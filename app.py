@@ -106,6 +106,15 @@ def safe_date(date_val):
         return date_val
     return date_val.strftime("%Y-%m-%d")
 
+def get_category_names(rows):
+    return [r["name"] if isinstance(r, dict) else r[0] for r in rows]
+
+def insert_category_ignore(cursor, is_mysql, category):
+    if is_mysql:
+        cursor.execute("INSERT IGNORE INTO categories (name) VALUES (?)", (category,))
+    else:
+        cursor.execute("INSERT OR IGNORE INTO categories (name) VALUES (?)", (category,))
+
 def monthly_trend(transactions):
     trend = {}
 
@@ -129,7 +138,7 @@ def monthly_trend(transactions):
 def home():
     print("HOME ROUTE START")
     if "user_id" not in session:
-        return redirect("/login")
+        return redirect("/welcome")
 
     conn, _ = get_db_connection()
     cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
@@ -207,11 +216,11 @@ def add():
     if "user_id" not in session:
         return redirect("/login")
 
-    conn, _ = get_db_connection()
-    cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
+    conn, is_mysql = get_db_connection()
+    cursor = conn.cursor(dictionary=True) if is_mysql else conn.cursor()
 
     cursor.execute("SELECT name FROM categories")
-    categories = [r[0] for r in cursor.fetchall()]
+    categories = get_category_names(cursor.fetchall())
 
     if request.method == "POST":
         try:
@@ -220,8 +229,7 @@ def add():
             category = request.form.get("category")
             if category == "__new__":
                 category = request.form.get("new_category")
-                # Insert new category if not exists
-                cursor.execute("INSERT OR IGNORE INTO categories (name) VALUES (?)", (category,))
+                insert_category_ignore(cursor, is_mysql, category)
 
             if not category:
                 category = "Other"
@@ -334,13 +342,62 @@ def edit(id):
     else:
         return redirect("/")
 
-# ----------------------
-# DELETE
-# ----------------------
-
-@app.route('/')
+@app.route('/welcome')
 def welcome():
+    if "user_id" in session:
+        return redirect("/")
     return render_template('welcome.html')
+
+# ----------------------
+# RANGE ANALYSIS
+# ----------------------
+@app.route("/range", methods=["GET", "POST"])
+def range_analysis():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    total = 0
+    results = []
+
+    if request.method == "POST":
+        conn, _ = get_db_connection()
+        cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
+        cursor.execute("SELECT * FROM transactions WHERE user_id=?", (session["user_id"],))
+        transactions = cursor.fetchall()
+        conn.close()
+
+        total, results = spending_by_range(
+            transactions,
+            request.form["start"],
+            request.form["end"]
+        )
+
+    return render_template("range.html", total=total, results=results)
+
+# ----------------------
+# SEARCH
+# ----------------------
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    total = 0
+    expenses = []
+
+    if request.method == "POST":
+        conn, _ = get_db_connection()
+        cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
+        date = request.form["date"]
+        cursor.execute(
+            "SELECT * FROM transactions WHERE user_id=? AND date=? AND type='expense'",
+            (session["user_id"], date)
+        )
+        expenses = cursor.fetchall()
+        conn.close()
+        total = sum(e["amount"] for e in expenses)
+
+    return render_template("search.html", total=total, expenses=expenses)
 
 # ----------------------
 # HISTORY
@@ -385,15 +442,13 @@ def set_budget():
     if "user_id" not in session:
         return redirect("/login")
 
-    conn, _ = get_db_connection()
-    cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
+    conn, is_mysql = get_db_connection()
+    cursor = conn.cursor(dictionary=True) if is_mysql else conn.cursor()
 
-    # GET categories
     cursor.execute("SELECT name FROM categories")
-    categories = [r[0] for r in cursor.fetchall()]
+    categories = get_category_names(cursor.fetchall())
 
     if request.method == "POST":
-        cursor = conn.cursor()
 
         category = request.form.get("category")
 
@@ -431,6 +486,7 @@ def set_budget():
 # ----------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    error = None
     if request.method == "POST":
         conn, _ = get_db_connection()
         cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
@@ -438,13 +494,13 @@ def register():
         username = request.form["username"]
         password = generate_password_hash(request.form["password"])
 
-        # CHECK IF USER EXISTS
         cursor.execute("SELECT * FROM users WHERE username=?", (username,))
         existing_user = cursor.fetchone()
 
         if existing_user:
             conn.close()
-            return "⚠️ Username already exists, try another"
+            error = "Username already exists. Please choose another."
+            return render_template("register.html", error=error)
 
         cursor.execute("""
             INSERT INTO users (username, password)
@@ -456,10 +512,11 @@ def register():
 
         return redirect("/login")
 
-    return render_template("register.html")
+    return render_template("register.html", error=error)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    error = None
     if request.method == "POST":
         conn, _ = get_db_connection()
         cursor = conn.cursor(dictionary=True) if _ else conn.cursor()
@@ -477,15 +534,15 @@ def login():
             session["username"] = user["username"]
             return redirect("/")
         else:
-            return "Invalid credentials"
+            error = "Invalid username or password. Please try again."
 
-    return render_template("login.html")
+    return render_template("login.html", error=error)
 
 
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect("/welcome")
 
 #    calculator route
 @app.route('/calculator')
@@ -579,4 +636,5 @@ def not_found(e):
 # RUN
 # ----------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    debug = os.getenv("FLASK_DEBUG", "1") == "1"
+    app.run(host="0.0.0.0", port=5000, debug=debug, use_reloader=debug)

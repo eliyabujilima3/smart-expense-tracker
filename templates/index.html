@@ -1,160 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Expense Tracker</title>
+    <title>Dashboard - Smart Expense Tracker</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+<body class="dashboard-body">
 
-<body>
-<p>{{ greeting }}, {{ username }} 👋</p>
-<div class="header">
-    <h2>💰 Smart Expense Tracker</h2>
-
-    <div class="user-info">
-        👤 Welcome, <strong>{{ username }}</strong>
-        <a href="/logout">🚪 Logout</a>
-    </div>
-</div>
-
-<!-- ================= SUMMARY ================= -->
-<h3>📅 Summary Spending</h3>
-<div class="cards">
-
-    <div class="card">
-        <h4>This Year</h4>
-        <p>{{ yearly }} TSh</p>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="sidebar-logo"><i class="fas fa-wallet"></i></div>
+        <span>Expense Tracker</span>
     </div>
 
-    <div class="card">
-        <h4>This Month</h4>
-        <p>{{ monthly }} TSh</p>
+    <nav class="sidebar-nav">
+        <a href="/set-budget" class="nav-item">
+            <i class="fas fa-sliders-h"></i>
+            <span>Set Budget</span>
+        </a>
+        <a href="{{ url_for('add_income') }}" class="nav-item">
+            <i class="fas fa-arrow-circle-down"></i>
+            <span>Income</span>
+        </a>
+        <a href="/add" class="nav-item">
+            <i class="fas fa-arrow-circle-up"></i>
+            <span>Expenses</span>
+        </a>
+        <a href="/history" class="nav-item">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+        <a href="/charts" class="nav-item">
+            <i class="fas fa-chart-pie"></i>
+            <span>Charts</span>
+        </a>
+        <a href="/range" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analysis</span>
+        </a>
+        <a href="/search" class="nav-item">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </a>
+        <a href="/calculator" class="nav-item">
+            <i class="fas fa-calculator"></i>
+            <span>Calculator</span>
+        </a>
+        <a href="/help" class="nav-item">
+            <i class="fas fa-question-circle"></i>
+            <span>Help</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/logout" class="nav-item logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
     </div>
+</aside>
 
-    <div class="card">
-        <h4>Today</h4>
-        <p>{{ today_total }} TSh</p>
-    </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-</div>
-
-<!-- ================= WALLET ================= -->
-<h2>💰 Wallet Summary</h2>
-
-<a href="/set-budget">💰 Set Budget</a>
-
-<p>
-    <strong>Balance:</strong>
-    {% if balance < 0 %}
-        <span style="color:red;">{{ balance }} TSh (Overspent)</span>
-    {% else %}
-        <span style="color:green;">{{ balance }} TSh</span>
-    {% endif %}
-</p>
-
-<p>Total Income: {{ income }} TSh</p>
-<p>Total Expenses: {{ expense }} TSh</p>
-
-<!-- ================= ACTIONS ================= -->
-<div class="actions">
-    <a href="{{ url_for('add_income') }}">➕ Income</a>
-    <a href="/add">➖ Expense</a>
-    <a href="/history">📜 History</a>
-    <a href="/charts">📊 Charts</a>
-    <a href="/range">📊 Analysis</a>
-    <a href="/search">🔍 Search</a>
-    <a href="/calculator">🧮 Calculator</a>
-    <a href="/help">📘 Help</a>
-</div>
-
-<!-- ================= INSIGHTS ================= -->
-<h2>🧠 Smart Insights</h2>
-
-<ul>
-{% for i in insights %}
-    <li style="margin:5px 0; font-size:16px;">
-        {{ i }}
-    </li>
-{% endfor %}
-</ul>
-<!-- ================= TABLE ================= -->
-<h2>Transactions</h2>
-
-<table border="1">
-<tr>
-    <th>Type</th>
-    <th>Name</th>
-    <th>Amount</th>
-    <th>Category</th>
-    <th>Date</th>
-    <th>Actions</th>
-</tr>
-
-{% for t in transactions %}
-<tr>
-    <td>
-        {% if t.type == "income" %}
-            <span style="color:green;">💰 Income</span>
-        {% else %}
-            <span style="color:red;">💸 Expense</span>
-        {% endif %}
-    </td>
-
-    <td>{{ t.name }}</td>
-    <td>{{ t.amount }}</td>
-    <td>{{ t.category }}</td>
-    <td>{{ t.date }}</td>
-
-    <td>
-        <a href="/edit/{{ t.id }}">✏️</a>
-        <a href="/delete/{{ t.id }}">🗑</a>
-    </td>
-</tr>
-{% endfor %}
-</table>
-
-<!-- ================= WARNINGS ================= -->
-<h2>⚠️ Budget Alerts</h2>
-
-{% if warnings and warnings|length > 0 %}
-    {% for w in warnings %}
-        <p style="color:red;">{{ w }}</p>
-    {% endfor %}
-{% else %}
-    <p style="color:green;">No budget warnings </p>
-{% endif %}
-
-<!-- ================= BUDGET INSIGHTS ================= -->
- <h2>🧠 Budget Intelligence</h2>
-
-{% for b in budget_insights %}
-    <p>{{ b }}</p>
-{% endfor %}
-
-<!-- ================= BUDGET USAGE ================= -->
-<h3>📦 Budget Usage</h3>
-
-<div class="cards">
-    {% for cat, data in budget_data.items() %}
-        <div class="card">
-            <h4>{{ cat }}</h4>
-
-            <p>{{ data.spent }} / {{ data.limit }} TSh</p>
-
-            <p style="
-                color:
-                {% if data.percent >= 100 %} red
-                {% elif data.percent >= 80 %} orange
-                {% else %} green
-                {% endif %}
-            ">
-                {{ data.percent }}%
-            </p>
-
+<div class="dashboard-main">
+    <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-left">
+            <p class="greeting">{{ greeting }}</p>
+            <h1>Dashboard</h1>
         </div>
-    {% endfor %}
+        <div class="topbar-user">
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+            <span>{{ username }}</span>
+        </div>
+    </header>
+
+    <main class="dashboard-content">
+
+        <!-- Summary stats -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-calendar-days"></i>
+                <h2>Summary Spending</h2>
+            </div>
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-calendar"></i></div>
+                    <div>
+                        <span class="stat-label">This Year</span>
+                        <span class="stat-value">{{ yearly }} TSh</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon indigo"><i class="fas fa-calendar-week"></i></div>
+                    <div>
+                        <span class="stat-label">This Month</span>
+                        <span class="stat-value">{{ monthly }} TSh</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon cyan"><i class="fas fa-sun"></i></div>
+                    <div>
+                        <span class="stat-label">Today</span>
+                        <span class="stat-value">{{ today_total }} TSh</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-landmark"></i>
+                <h2>Wallet Summary</h2>
+            </div>
+            <div class="wallet-grid">
+                <div class="wallet-card balance">
+                    <span class="wallet-label">Balance</span>
+                    <span class="wallet-amount {% if balance < 0 %}negative{% else %}positive{% endif %}">
+                        {{ balance }} TSh
+                        {% if balance < 0 %}<small>Overspent</small>{% endif %}
+                    </span>
+                </div>
+                <div class="wallet-card">
+                    <span class="wallet-label"><i class="fas fa-arrow-down"></i> Total Income</span>
+                    <span class="wallet-amount positive">{{ income }} TSh</span>
+                </div>
+                <div class="wallet-card">
+                    <span class="wallet-label"><i class="fas fa-arrow-up"></i> Total Expenses</span>
+                    <span class="wallet-amount negative">{{ expense }} TSh</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-lightbulb"></i>
+                <h2>Smart Insights</h2>
+            </div>
+            <ul class="insight-list">
+                {% for i in insights %}
+                <li>{{ i }}</li>
+                {% else %}
+                <li class="empty">No insights yet. Add transactions to get started.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- Transactions -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-list"></i>
+                <h2>Today's Transactions</h2>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>
+                                {% if t.type == "income" %}
+                                <span class="badge income"><i class="fas fa-arrow-down"></i> Income</span>
+                                {% else %}
+                                <span class="badge expense"><i class="fas fa-arrow-up"></i> Expense</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ t.name }}</td>
+                            <td>{{ t.amount }} TSh</td>
+                            <td>{{ t.category }}</td>
+                            <td>{{ t.date }}</td>
+                            <td class="actions-cell">
+                                <a href="/edit/{{ t.id }}" class="btn-icon edit" title="Edit"><i class="fas fa-edit"></i></a>
+                                <a href="/delete/{{ t.id }}" class="btn-icon delete" title="Delete"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-row">No transactions today.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Budget alerts -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2>Budget Alerts</h2>
+            </div>
+            <div class="alert-list">
+                {% if warnings and warnings|length > 0 %}
+                    {% for w in warnings %}
+                    <div class="alert-item warning">{{ w }}</div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert-item success"><i class="fas fa-check-circle"></i> All budgets on track</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Budget intelligence -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-brain"></i>
+                <h2>Budget Intelligence</h2>
+            </div>
+            <div class="insight-list compact">
+                {% for b in budget_insights %}
+                <p>{{ b }}</p>
+                {% else %}
+                <p class="empty">Set budgets to see intelligence reports.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Budget usage -->
+        <section class="section-block">
+            <div class="section-title">
+                <i class="fas fa-layer-group"></i>
+                <h2>Budget Usage</h2>
+            </div>
+            <div class="budget-grid">
+                {% for cat, data in budget_data.items() %}
+                <div class="budget-item">
+                    <div class="budget-item-header">
+                        <h4>{{ cat }}</h4>
+                        <span class="budget-percent {% if data.percent >= 100 %}danger{% elif data.percent >= 80 %}warn{% else %}ok{% endif %}">
+                            {{ data.percent }}%
+                        </span>
+                    </div>
+                    <p class="budget-amounts">{{ data.spent }} / {{ data.limit }} TSh</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill {% if data.percent >= 100 %}danger{% elif data.percent >= 80 %}warn{% else %}ok{% endif %}"
+                             style="width: {{ [data.percent, 100]|min }}%"></div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="empty">No budgets set yet. <a href="/set-budget">Set a budget</a></p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
 </div>
+
+<script>
+function toggleSidebar() {
+    document.body.classList.toggle('sidebar-open');
+}
+function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+}
+document.querySelectorAll('.sidebar-nav .nav-item, .sidebar-footer .logout').forEach(function(link) {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 768) closeSidebar();
+    });
+});
+</script>
 </body>
 </html>

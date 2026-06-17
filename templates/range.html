@@ -1,41 +1,49 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>Range Analysis</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<h1>📅 Range Analysis</h1>
+</head>
+<body>
 
-<form method="POST">
-    <label>From:</label>
-    <input type="date" name="start" required>
+<div class="container">
+    <h1>📅 Range Analysis</h1>
 
-    <label>To:</label>
-    <input type="date" name="end" required>
+    <form method="POST">
+        <label>From:</label>
+        <input type="date" name="start" required>
 
-    <button type="submit">Analyze</button>
-</form>
+        <label>To:</label>
+        <input type="date" name="end" required>
 
-<h3>Total Spending: {{ total }} TSh</h3>
+        <button type="submit">Analyze</button>
+    </form>
 
-<table border="1">
-<tr>
-    <th>Name</th>
-    <th>Amount</th>
-    <th>Category</th>
-    <th>Date</th>
-</tr>
+    <h3>Total Spending: {{ total }} TSh</h3>
 
-{% for exp in results %}
-<tr>
-    <td>{{ exp.name }}</td>
-    <td>{{ exp.amount }}</td>
-    <td>{{ exp.category }}</td>
-    <td>{{ exp.date }}</td>
-</tr>
-{% endfor %}
-</table>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Date</th>
+        </tr>
 
-<br>
-<a href="/">⬅ Back</a>
+        {% for exp in results %}
+        <tr>
+            <td>{{ exp.name }}</td>
+            <td>{{ exp.amount }}</td>
+            <td>{{ exp.category }}</td>
+            <td>{{ exp.date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/">⬅ Back</a>
+</div>
+
 </body>
 </html>

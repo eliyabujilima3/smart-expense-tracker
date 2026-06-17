@@ -1,25 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register - Expense Tracker</title>
+    <title>Register - Smart Expense Tracker</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="auth-body">
 
-<div class="auth-container">
-    <h2>📝 Register</h2>
+<div class="auth-split">
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+    <div class="auth-panel-left">
+        <div class="auth-panel-content">
+            <div class="brand-badge">
+                <i class="fas fa-wallet"></i>
+                <span>Smart Expense Tracker</span>
+            </div>
 
-        <button type="submit">Register</button>
-    </form>
+            <h1>Start your financial journey</h1>
+            <p class="auth-lead">
+                Create a free account and begin tracking your expenses, setting budgets,
+                and making smarter money decisions today.
+            </p>
 
-    <p>Already have an account?</p>
-    <a href="/login">Login</a>
+            <ul class="auth-features">
+                <li>
+                    <span class="feature-icon"><i class="fas fa-bolt"></i></span>
+                    <div>
+                        <strong>Quick setup</strong>
+                        <p>Register in under a minute and start logging transactions.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon"><i class="fas fa-chart-line"></i></span>
+                    <div>
+                        <strong>Visual reports</strong>
+                        <p>Charts and analytics to see your spending at a glance.</p>
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon"><i class="fas fa-bell"></i></span>
+                    <div>
+                        <strong>Budget alerts</strong>
+                        <p>Get notified when you're approaching your spending limits.</p>
+                    </div>
+                </li>
+            </ul>
+
+            <p class="auth-tagline">Join thousands managing money smarter</p>
+        </div>
+    </div>
+
+    <div class="auth-panel-right">
+        <div class="auth-form-card">
+            <div class="auth-form-header">
+                <h2>Create account</h2>
+                <p>Fill in your details to get started</p>
+            </div>
+
+            {% if error %}
+            <div class="auth-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="login-form">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-user-plus"></i>
+                    Register
+                </button>
+            </form>
+
+            <div class="auth-form-footer">
+                <p>Already have an account?</p>
+                <a href="/login" class="register-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign in instead
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
-
 </body>
 </html>

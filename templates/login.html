@@ -1,76 +1,144 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login - Smart Expense Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="auth-body">
-
-<div class="auth-container">
-    <div class="logo-section">
-        <div class="logo">
-            <i class="fas fa-wallet"></i>
-        </div>
-        <h1>Smart Expense Tracker</h1>
-        <p class="tagline">This is the application that helps users manage their finances by tracking expenses, setting budgets, and analysing spending behaviour.</p>
-    </div>
-
-    <div class="welcome-section">
-        <p class="description">
-            Welcome! To login, enter your details below and click the button.
-            If you don't have an account yet, register to get started.
-        </p>
-    </div>
-
-    <form method="POST" class="login-form">
-        <div class="input-group">
-            <i class="fas fa-user"></i>
-            <input type="text" name="username" placeholder="Username" required>
-        </div>
-
-        <div class="input-group">
-            <i class="fas fa-lock"></i>
-            <input type="password" id="password" name="password" placeholder="Password" required>
-            <span onclick="togglePassword()" class="password-toggle">
-                <i class="fas fa-eye" id="eye-icon"></i>
-            </span>
-        </div>
-
-        <button type="submit" class="login-btn">
-            <i class="fas fa-sign-in-alt"></i>
-            Login
-        </button>
-    </form>
-
-    <div class="divider">
-        <span>If you don't have an account, register below.</span>
-    </div>
-
-    <a href="/register" class="register-link">
-        <i class="fas fa-user-plus"></i>
-        Register
-    </a>
-
-    <div class="footer">
-        <p>Secure • Private • Smart</p>
-    </div>
-</div>
-
-<script>
-function togglePassword() {
-    let pass = document.getElementById("password");
-    let eyeIcon = document.getElementById("eye-icon");
-
-    if (pass.type === "password") {
-        pass.type = "text";
-        eyeIcon.className = "fas fa-eye-slash";
-    } else {
-        pass.type = "password";
-        eyeIcon.className = "fas fa-eye";
-    }
-}
-</script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login - Smart Expense Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=4">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Force visible login form colors */
+        body.login-only {
+            background: #e8edf5 !important;
+            color: #000 !important;
+            color-scheme: light !important;
+        }
+        .login-page .auth-form-card {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+        .login-page .auth-form-header h2 {
+            color: #000000 !important;
+        }
+        .login-page .auth-form-header p {
+            color: #444444 !important;
+        }
+        .login-page .input-group label {
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+        .login-page .input-wrap input {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            border: 2px solid #333333 !important;
+            caret-color: #000000 !important;
+        }
+        .login-page .input-wrap input::placeholder {
+            color: #666666 !important;
+        }
+        .login-page .input-wrap input:focus {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border-color: #2563eb !important;
+            outline: none !important;
+        }
+        .login-page .login-form {
+            background: transparent !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            padding: 0 !important;
+        }
+        .login-page .login-btn {
+            background: #2563eb !important;
+            color: #ffffff !important;
+        }
+        .login-page .register-link {
+            background: #e8f0fe !important;
+            color: #1a56db !important;
+        }
+        .login-page .back-link {
+            color: #444444 !important;
+            background: none !important;
+        }
+    </style>
+</head>
+<body class="auth-body login-only">
+
+<div class="login-page">
+    <div class="auth-form-card">
+        <div class="auth-form-header">
+            <div class="login-logo">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <h2>Welcome back</h2>
+            <p>Sign in to continue</p>
+        </div>
+
+        {% if error %}
+        <div class="auth-error">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="login-form">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" name="username"
+                        placeholder="Enter your username" required autocomplete="username"
+                        style="background:#fff; color:#000; border:2px solid #333;">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password"
+                        placeholder="Enter your password" required autocomplete="current-password"
+                        style="background:#fff; color:#000; border:2px solid #333;">
+                    <span onclick="togglePassword()" class="password-toggle" title="Show/hide password">
+                        <i class="fas fa-eye" id="eye-icon"></i>
+                    </span>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-form-footer">
+            <a href="/register" class="register-link">
+                <i class="fas fa-user-plus"></i>
+                Create an account
+            </a>
+            <a href="/welcome" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to welcome
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const pass = document.getElementById("password");
+    const eyeIcon = document.getElementById("eye-icon");
+    if (pass.type === "password") {
+        pass.type = "text";
+        eyeIcon.className = "fas fa-eye-slash";
+    } else {
+        pass.type = "password";
+        eyeIcon.className = "fas fa-eye";
+    }
+}
+</script>
+</body>
+</html>

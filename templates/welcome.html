@@ -1,75 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Welcome - Smart Expense Tracker</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-        }
-
-        .container {
-            padding: 60px 20px;
-        }
-
-        h1 {
-            font-size: 32px;
-        }
-
-        p {
-            color: #cbd5f5;
-            max-width: 500px;
-            margin: auto;
-        }
-
-        .buttons a {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 20px;
-            background: #22c55e;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-        }
-
-        .buttons a:hover {
-            background: #16a34a;
-        }
-
-        .features {
-            margin-top: 30px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+<body class="auth-body">
 
-<body>
+<div class="auth-split">
 
-<div class="container">
+    <div class="auth-panel-left">
+        <div class="welcome-dashboard">
+            <div class="wd-header">
+                <div class="wd-brand">
+                    <i class="fas fa-wallet"></i>
+                    <span>Smart Expense Tracker</span>
+                </div>
+                <span class="wd-greeting">GOOD MORNING 👋</span>
+            </div>
 
-    <h1>📊 Smart Expense Tracker</h1>
+            <div class="wd-stats">
+                <div class="wd-stat-card">
+                    <span class="wd-stat-label">Balance</span>
+                    <span class="wd-stat-value green">1,250,000 TSh</span>
+                </div>
+                <div class="wd-stat-card">
+                    <span class="wd-stat-label">This Month</span>
+                    <span class="wd-stat-value">320,000 TSh</span>
+                </div>
+                <div class="wd-stat-card">
+                    <span class="wd-stat-label">Today</span>
+                    <span class="wd-stat-value">15,000 TSh</span>
+                </div>
+            </div>
 
-    <p>
-        Manage your income and expenses, track your budget, 
-        and gain insights into your financial habits easily.
-    </p>
+            <div class="wd-wallet">
+                <div class="wd-wallet-row">
+                    <span><i class="fas fa-arrow-down"></i> Income</span>
+                    <strong>2,500,000 TSh</strong>
+                </div>
+                <div class="wd-wallet-row">
+                    <span><i class="fas fa-arrow-up"></i> Expenses</span>
+                    <strong>1,250,000 TSh</strong>
+                </div>
+            </div>
 
-    <div class="buttons">
-        <a href="/login">🔐 Login</a>
-        <a href="/register">📝 Register</a>
+            <div class="wd-chart">
+                <div class="wd-chart-bar" style="height: 55%"></div>
+                <div class="wd-chart-bar" style="height: 80%"></div>
+                <div class="wd-chart-bar" style="height: 45%"></div>
+                <div class="wd-chart-bar" style="height: 70%"></div>
+                <div class="wd-chart-bar" style="height: 60%"></div>
+                <div class="wd-chart-bar" style="height: 90%"></div>
+            </div>
+
+            <div class="wd-actions">
+                <span class="wd-action-btn"><i class="fas fa-plus"></i></span>
+                <span class="wd-action-btn"><i class="fas fa-minus"></i></span>
+                <span class="wd-action-btn"><i class="fas fa-chart-pie"></i></span>
+                <span class="wd-action-btn"><i class="fas fa-history"></i></span>
+            </div>
+        </div>
     </div>
 
-    <div class="features">
-        <p>✔ Track daily expenses</p>
-        <p>✔ Monitor your budget</p>
-        <p>✔ View analytics & graphs</p>
+    <div class="auth-panel-right welcome-panel-right">
+        <div class="welcome-cta-card">
+            <h2>Get started</h2>
+            <p>Track expenses, set budgets, and manage your money smarter.</p>
+
+            <div class="welcome-buttons">
+                <a href="/login" class="welcome-btn primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </a>
+                <a href="/register" class="welcome-btn secondary">
+                    <i class="fas fa-user-plus"></i>
+                    Register
+                </a>
+            </div>
+        </div>
     </div>
 
 </div>
-
 </body>
 </html>
