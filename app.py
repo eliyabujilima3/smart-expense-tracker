@@ -10,7 +10,9 @@ from analytics.engine import *
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "super_secret_key_123")
-
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
 # Initialize database
 def init_db():
     conn, is_mysql = get_db_connection()
@@ -530,6 +532,7 @@ def login():
         conn.close()
 
         if user and check_password_hash(user["password"], password):
+            session.permanent = True
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             return redirect("/")

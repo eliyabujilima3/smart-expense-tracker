@@ -1,14 +1,19 @@
 import os
 import sqlite3
-import mysql.connector
-from mysql.connector import Error
 
 def get_db_connection():
     database_url = os.getenv('DATABASE_URL')
     if database_url and database_url.startswith('mysql://'):
+        try:
+            import re
+            import mysql.connector
+            from mysql.connector import Error
+        except ImportError as e:
+            print(f"MySQL connector not installed: {e}")
+            return None, True
+
         # Parse DATABASE_URL for MySQL
         # Assuming format: mysql://user:password@host:port/database or mysql://user:password@host/database
-        import re
         match = re.match(r'mysql://([^:]+):([^@]+)@([^:/]+)(?::(\d+))?/(.+)', database_url)
         if match:
             user, password, host, port, database = match.groups()
