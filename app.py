@@ -4,15 +4,49 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import uuid
 import os
+import logging
 
 # IMPORT ANALYTICS
 from analytics.engine import *
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "super_secret_key_123")
+
+# --- Secret / session handling ---
+# Require a SECRET_KEY in production to avoid session invalidation after restarts.
+secret = os.getenv("SECRET_KEY")
+flask_debug = os.getenv("FLASK_DEBUG", "0") == "1"
+
+if not secret and not flask_debug:
+    # Fail fast in production so deployments clearly show the missing secret.
+    raise RuntimeError("Missing SECRET_KEY environment variable. Set SECRET_KEY for production deployments.")
+
+# Use a development-only fallback when FLASK_DEBUG=1 so local development works without env vars.
+app.secret_key = secret or "dev_only_secret_for_local_testing"
+
+# Sessions: keep users logged in for 30 days by default and refresh expiry on each request
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
+# In production (non-debug), require secure cookies (HTTPS)
+app.config["SESSION_COOKIE_SECURE"] = not flask_debug
+
+# Optional: attempt to enable server-side sessions if Flask-Session and redis are available
+# This is useful for multi-instance deployments or when you want sessions to survive app restarts.
+redis_url = os.getenv("REDIS_URL")
+if redis_url:
+    try:
+        from flask_session import Session
+        import redis
+
+        app.config["SESSION_TYPE"] = "redis"
+        app.config["SESSION_REDIS"] = redis.from_url(redis_url)
+        Session(app)
+        logging.info("Flask-Session enabled using REDIS_URL")
+    except Exception as e:
+        # If Flask-Session/redis are not installed or misconfigured, we don't fail the app.
+        logging.warning("Flask-Session not configured (missing package or invalid REDIS_URL): %s", e)
+
 # Initialize database
 def init_db():
     conn, is_mysql = get_db_connection()
@@ -149,7 +183,7 @@ def home():
     transactions = cursor.fetchall()
 
     cursor.execute(
-            "SELECT * FROM budgets WHERE user_id=?",
+            "SELECT * FROM budgets WHERE user_id= ?",
             (session["user_id"],)
         )
 
